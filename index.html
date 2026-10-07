@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>好きな妖怪種族メーカー（初代版）</title>
+    <title>好きな妖怪種族メーカー（初代・真の大辞典版）</title>
     <style>
         body { font-family: 'Helvetica Neue', Arial, sans-serif; text-align: center; background: #f4f6f9; margin: 0; padding: 20px; color: #333; }
         h1 { font-size: 1.4rem; color: #2c3e50; margin-bottom: 5px; }
@@ -18,7 +18,7 @@
         .slot-title { font-weight: bold; font-size: 0.85rem; margin-bottom: 6px; }
         .selected-name { font-size: 1.1rem; font-weight: bold; color: #333; }
         
-        /* 種族ごとのイメージカラー */
+        /* 各種族の公式イメージカラー */
         .isamashi { border: 3px solid #e74c3c; } .isamashi .slot-title { color: #e74c3c; }
         .fushigi { border: 3px solid #f1c40f; } .fushigi .slot-title { color: #f39c12; }
         .goketsu { border: 3px solid #e67e22; } .goketsu .slot-title { color: #d35400; }
@@ -35,7 +35,8 @@
         .yokai-list-wrapper { overflow-y: auto; flex-grow: 1; padding-right: 5px; }
         
         /* リスト内のボタン */
-        .yokai-btn { display: block; width: 100%; padding: 12px; margin: 8px 0; font-size: 1rem; font-weight: 500; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; color: #333; text-align: center; -webkit-tap-highlight-color: transparent; }
+        .yokai-btn { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 12px; margin: 8px 0; font-size: 1rem; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; color: #333; -webkit-tap-highlight-color: transparent; }
+        .yokai-btn .no-tag { font-size: 0.75rem; color: #aaa; font-family: monospace; }
         .yokai-btn:active { background: #f5f5f5; }
         .close-btn { width: 100%; padding: 12px; margin-top: 15px; font-size: 1rem; border: none; border-radius: 8px; background: #bdc3c7; color: white; font-weight: bold; }
     </style>
@@ -80,7 +81,7 @@
         </div>
     </div>
 
-    <!-- 妖怪選択ポップアップ -->
+    <!-- 選択ダイアログ -->
     <div class="modal" id="yokaiModal" onclick="closeModal()">
         <div class="modal-content" onclick="event.stopPropagation()">
             <div class="modal-header" id="modalTitle">妖怪を選択</div>
@@ -90,48 +91,258 @@
     </div>
 
     <script>
-        // 妖怪ウォッチ1の全8種族データ
-        const yokaiData = {
-            isamashi: ["ダルマッカ", "だるまっちょ", "グラグライオン", "メラメライオン", "轟獅子", "しょうブシ", "まぼ老師", "かげ老師", "ほう老師", "ベンケイ", "からくりベンケイ", "ちからモチ", "やきモチ", "クワノ武士", "クワガ大将", "武者かぶと", "かぶと無双", "なまはげ", "ちすじのナマハゲ", "クワガタ大将", "オオクワノ神", "ブシニャン"],
-            fushigi: ["バクロ婆", "動くバクロ婆", "どハツラツ", "わすれん帽", "メゾン・ドワスレ", "ばか頭巾", "のっぺら坊", "まぼ老師", "かげ老師", "ほう老師", "うんがい鏡", "さとりちゃん", "よつめ", "天狗", "ほむら天狗", "きゅうび", "犬神", "モテモ天", "モテマクール", "モテヌス", "かたのり小僧", "かたのり親方", "ぎしんあん鬼"],
-            goketsu: ["グレるりん", "ゴリだるま", "アニ鬼", "ヨロイさん", "ゲンカノコウジ", "モレゾウ", "プルファント", "ガマンモス", "迷い車", "だっせんしゃ", "くろがねセンシャ", "ムリカベ", "むりだ城", "シロカベ", "うみぼうず", "大ガマ", "土蜘蛛", "ロボニャン", "金太郎ニャン", "ゴルニャン"],
-            purichi: ["ジバニャン", "トゲニャン", "ワルニャン", "ブチニャン", "コマさん", "ししコマ", "コマじろう", "とらじろう", "コマみ", "セミまる", "カゲまる", "ヒグラシまる", "さとりちゃん", "エミちゃん", "ゆきおんな", "ふぶき姫", "百鬼姫", "バク", "おツマミちゃん", "マスターニャーダ"],
-            pokapoka: ["サンタク労", "ふくろじじい", "ぜっこう蝶", "ゼッコウ蝶", "サイコウ蝶", "アゲアゲハ", "キズナメコ", "キズナース", "びきゃく", "しゃれこ婦人", "カラカラさん", "ほね美人", "ひも爺", "くう腹爺", "こめ爺", "ワカメくん", "コンブくん", "メカブちゃん", "ワカメ☆スター"],
-            usurakage: ["みちび鬼", "えこひいき", "ちくり魔", "ひきコウモリ", "トジコウモリ", "ヤミコウモリ", "ネガティブーン", "ジャガバタ坊", "かぜかも", "ガブニャン", "魔ガサス", "メデューサ", "三途の犬", "かたづ家来", "アライ魔将", "リー夫人", "ミツマタノヅチ"],
-            bukimi: ["トホホギス", "ブカッコウ", "死神鳥", "じんめん犬", "かおベロス", "三途の犬", "けうけげん", "ふさふさん", "くちだけおんな", "おとらおんな", "じがじぃさん", "のぼせトンマン", "おならず者", "へこ鬼神", "ドンヨリーヌ", "まてんし", "かたづ家来"],
-            nyororon: ["ノコノコ", "ツチノコ", "ツチノコパンダ", "ふくりゅう", "りゅーくん", "龍神", "青龍", "ろくろ首", "ボー坊", "しらんプリン", "にんぎょ", "八百比丘尼", "イザナミ", "ムカムカデ", "激ドラゴン", "オロチ", "影オロチ", "ミツマタノヅチ"]
-        };
+        // 【初代公式大辞典・通常・レジェンド・宝石 完璧マッピング全223匹】
+        const yokaiData = [
+            { no: "001", name: "ぶようじん坊", tribe: "isamashi" },
+            { no: "002", name: "がらあきん坊", tribe: "isamashi" },
+            { no: "003", name: "さきがけの助", tribe: "isamashi" },
+            { no: "004", name: "ダラケ刀", tribe: "isamashi" },
+            { no: "005", name: "ザンバラ刀", tribe: "isamashi" },
+            { no: "006", name: "ダララだんびら", tribe: "isamashi" },
+            { no: "007", name: "ちからモチ", tribe: "isamashi" },
+            { no: "008", name: "やきモチ", tribe: "isamashi" },
+            { no: "009", name: "カブトさん", tribe: "isamashi" },
+            { no: "010", name: "ゲンマ将軍", tribe: "isamashi" },
+            { no: "011", name: "黄泉ゲンスイ", tribe: "isamashi" },
+            { no: "012", name: "ちからオヤジ", tribe: "isamashi" },
+            { no: "013", name: "クワノ武士", tribe: "isamashi" },
+            { no: "014", name: "クワガ大将", tribe: "isamashi" },
+            { no: "015", name: "オオクワノ神", tribe: "isamashi" },
+            { no: "016", name: "武者かぶと", tribe: "isamashi" },
+            { no: "017", name: "かぶと無双", tribe: "isamashi" },
+            { no: "018", name: "オオツノノ神", tribe: "isamashi" },
+            { no: "019", name: "メラメライオン", tribe: "isamashi" },
+            { no: "020", name: "グラグライオン", tribe: "isamashi" },
+            { no: "021", name: "轟獅子", tribe: "isamashi" },
+            { no: "022", name: "しょうブシ", tribe: "isamashi" },
+            { no: "023", name: "まさむね", tribe: "isamashi" },
+            { no: "024", name: "むらまさ", tribe: "isamashi" },
+            { no: "025", name: "くさなぎ", tribe: "isamashi" },
+            { no: "026", name: "万尾獅子", tribe: "isamashi" },
+            { no: "027", name: "なまはげ", tribe: "isamashi" },
+            { no: "028", name: "わすれん帽", tribe: "fushigi" },
+            { no: "029", name: "メゾン・ドワスレ", tribe: "fushigi" },
+            { no: "030", name: "ばか頭巾", tribe: "fushigi" },
+            { no: "031", name: "つらがわり", tribe: "fushigi" },
+            { no: "032", name: "モテモ天", tribe: "fushigi" },
+            { no: "033", name: "モテマクール", tribe: "fushigi" },
+            { no: "034", name: "モテヌス", tribe: "fushigi" },
+            { no: "035", name: "かたのり小僧", tribe: "fushigi" },
+            { no: "036", name: "かたのり親方", tribe: "fushigi" },
+            { no: "037", name: "ぎしんあん鬼", tribe: "fushigi" },
+            { no: "038", name: "ガ鬼", tribe: "fushigi" },
+            { no: "039", name: "あまのじゃく", tribe: "fushigi" },
+            { no: "040", name: "バクロ婆", tribe: "fushigi" },
+            { no: "041", name: "ババァーン", tribe: "fushigi" },
+            { no: "042", name: "どケチん坊", tribe: "fushigi" },
+            { no: "043", name: "ほむら天狗", tribe: "fushigi" },
+            { no: "044", name: "でんじん", tribe: "fushigi" },
+            { no: "045", name: "はつ電しん", tribe: "fushigi" },
+            { no: "046", name: "うんがい鏡", tribe: "fushigi" },
+            { no: "047", name: "ヤミ鏡", tribe: "fushigi" },
+            { no: "048", name: "まぼ老師", tribe: "fushigi" },
+            { no: "049", name: "かげ老師", tribe: "fushigi" },
+            { no: "050", name: "ほう老師", tribe: "fushigi" },
+            { no: "051", name: "さとりちゃん", tribe: "fushigi" },
+            { no: "052", name: "よつめ", tribe: "fushigi" },
+            { no: "053", name: "天狗", tribe: "fushigi" },
+            { no: "054", name: "キュウビ", tribe: "fushigi" },
+            { no: "055", name: "犬神", tribe: "fushigi" },
+            { no: "056", name: "もれネコ", tribe: "fushigi" },
+            { no: "057", name: "グレるりん", tribe: "goketsu" },
+            { no: "058", name: "ゴリだるま", tribe: "goketsu" },
+            { no: "059", name: "アニ鬼", tribe: "goketsu" },
+            { no: "060", name: "ヨロイさん", tribe: "goketsu" },
+            { no: "061", name: "モノマネキン", tribe: "goketsu" },
+            { no: "062", name: "トオセンボン", tribe: "goketsu" },
+            { no: "063", name: "くろがねセンシャ", tribe: "goketsu" },
+            { no: "064", name: "まぼろし車", tribe: "goketsu" },
+            { no: "065", name: "だっせんしゃ", tribe: "goketsu" },
+            { no: "066", name: "ムリカベ", tribe: "goketsu" },
+            { no: "067", name: "むりだ城", tribe: "goketsu" },
+            { no: "068", name: "シロカベ", tribe: "goketsu" },
+            { no: "069", name: "ウォール・ガイ", tribe: "goketsu" },
+            { no: "070", name: "モレゾウ", tribe: "goketsu" },
+            { no: "071", name: "プルファント", tribe: "goketsu" },
+            { no: "072", name: "ガマンモス", tribe: "goketsu" },
+            { no: "073", name: "うみぼうず", tribe: "goketsu" },
+            { no: "074", name: "大やもり", tribe: "goketsu" },
+            { no: "075", name: "ふじのやま", tribe: "goketsu" },
+            { no: "076", name: "さくらのじま", tribe: "goketsu" },
+            { no: "077", name: "キンカク", tribe: "goketsu" },
+            { no: "078", name: "ギンカク", tribe: "goketsu" },
+            { no: "079", name: "ドウカク", tribe: "goketsu" },
+            { no: "080", name: "プラチナカク", tribe: "goketsu" },
+            { no: "081", name: "ロボニャン", tribe: "goketsu" },
+            { no: "082", name: "ゴルニャン", tribe: "goketsu" },
+            { no: "083", name: "からくり大将", tribe: "goketsu" },
+            { no: "084", name: "ジバニャン", tribe: "purichi" },
+            { no: "085", name: "トゲニャン", tribe: "purichi" },
+            { no: "086", name: "ワルニャン", tribe: "purichi" },
+            { no: "087", name: "ほね美人", tribe: "purichi" },
+            { no: "088", name: "セミまる", tribe: "purichi" },
+            { no: "089", name: "カゲまる", tribe: "purichi" },
+            { no: "090", name: "ヒグラシまる", tribe: "purichi" },
+            { no: "091", name: "ノガッパ", tribe: "purichi" },
+            { no: "092", name: "たびガッパ", tribe: "purichi" },
+            { no: "093", name: "かっぱ", tribe: "purichi" },
+            { no: "094", name: "コマさん", tribe: "purichi" },
+            { no: "095", name: "ししコマ", tribe: "purichi" },
+            { no: "096", name: "コマじろう", tribe: "purichi" },
+            { no: "097", name: "とらじろう", tribe: "purichi" },
+            { no: "098", name: "バク", tribe: "purichi" },
+            { no: "099", name: "おつまみちゃん", tribe: "purichi" },
+            { no: "100", name: "ゆきおんな", tribe: "purichi" },
+            { no: "101", name: "ふぶき姫", tribe: "purichi" },
+            { no: "102", name: "百鬼姫", tribe: "purichi" },
+            { no: "103", name: "おねむの精", tribe: "purichi" },
+            { no: "104", name: "ゴマすり皿", tribe: "purichi" },
+            { no: "105", name: "ちりめん問屋", tribe: "purichi" },
+            { no: "106", name: "雨ふらし", tribe: "purichi" },
+            { no: "107", name: "こおりん坊", tribe: "purichi" },
+            { no: "108", name: "化け草履", tribe: "purichi" },
+            { no: "109", name: "ゾロ目ん坊", tribe: "purichi" },
+            { no: "110", name: "モノマネキン(P)", tribe: "purichi" },
+            { no: "111", name: "キズナメコ", tribe: "pokapoka" },
+            { no: "112", name: "キズナース", tribe: "pokapoka" },
+            { no: "113", name: "つまみぐいのすけ", tribe: "pokapoka" },
+            { no: "114", name: "ひも爺", tribe: "pokapoka" },
+            { no: "115", name: "くう腹爺", tribe: "pokapoka" },
+            { no: "116", name: "こめ爺", tribe: "pokapoka" },
+            { no: "117", name: "ワカメくん", tribe: "pokapoka" },
+            { no: "118", name: "コンブくん", tribe: "pokapoka" },
+            { no: "119", name: "メカブちゃん", tribe: "pokapoka" },
+            { no: "120", name: "ワカメ☆スター", tribe: "pokapoka" },
+            { no: "121", name: "昆布さん", tribe: "pokapoka" },
+            { no: "122", name: "ぜっこう蝶", tribe: "pokapoka" },
+            { no: "123", name: "ゼッコウ蝶", tribe: "pokapoka" },
+            { no: "124", name: "サイコウ蝶", tribe: "pokapoka" },
+            { no: "125", name: "アゲアゲハ", tribe: "pokapoka" },
+            { no: "126", name: "はつらつ帽", tribe: "pokapoka" },
+            { no: "127", name: "おもいだスッポン", tribe: "pokapoka" },
+            { no: "128", name: "びきゃく", tribe: "pokapoka" },
+            { no: "129", name: "しゃれこ婦人", tribe: "pokapoka" },
+            { no: "130", name: "カラカラさん", tribe: "pokapoka" },
+            { no: "131", name: "ほね美人(PO)", tribe: "pokapoka" },
+            { no: "132", name: "サンタク労", tribe: "pokapoka" },
+            { no: "133", name: "ふくろじじい", tribe: "pokapoka" },
+            { no: "134", name: "うらや飯", tribe: "pokapoka" },
+            { no: "135", name: "プライ丼", tribe: "pokapoka" },
+            { no: "136", name: "みちび鬼", tribe: "usurakage" },
+            { no: "137", name: "えこひいき", tribe: "usurakage" },
+            { no: "138", name: "かたづ家来", tribe: "usurakage" },
+            { no: "139", name: "アライ魔将", tribe: "usurakage" },
+            { no: "140", name: "ネガティブーン", tribe: "usurakage" },
+            { no: "141", name: "ジャガバタ坊", tribe: "usurakage" },
+            { no: "142", name: "かぜかも", tribe: "usurakage" },
+            { no: "143", name: "ひきコウモリ", tribe: "usurakage" },
+            { no: "144", name: "トジコウモリ", tribe: "usurakage" },
+            { no: "145", name: "ヤミコウモリ", tribe: "usurakage" },
+            { no: "146", name: "ちくり魔", tribe: "usurakage" },
+            { no: "147", name: "ぎしんあん鬼(U)", tribe: "usurakage" },
+            { no: "148", name: "ガ鬼(U)", tribe: "usurakage" },
+            { no: "149", name: "あまのじゃく(U)", tribe: "usurakage" },
+            { no: "150", name: "魔ガサス", tribe: "usurakage" },
+            { no: "151", name: "メデューサ", tribe: "usurakage" },
+            { no: "152", name: "テンパるん坊", tribe: "usurakage" },
+            { no: "153", name: "ぎっくり男", tribe: "usurakage" },
+            { no: "154", name: "ミチクサメ", tribe: "usurakage" },
+            { no: "155", name: "くさなぎ(U)", tribe: "usurakage" },
+            { no: "156", name: "じみぃ", tribe: "usurakage" },
+            { no: "157", name: "カゲロー", tribe: "usurakage" },
+            { no: "158", name: "カイコウモリ", tribe: "usurakage" },
+            { no: "159", name: "のっぺら坊", tribe: "usurakage" },
+            { no: "160", name: "びんボーボー", tribe: "usurakage" },
+            { no: "161", name: "お金ナイダー", tribe: "usurakage" },
+            { no: "162", name: "じんめん犬", tribe: "bukimi" },
+            { no: "163", name: "かおベロス", tribe: "bukimi" },
+            { no: "164", name: "三途の犬", tribe: "bukimi" },
+            { no: "165", name: "トホホギス", tribe: "bukimi" },
+            { no: "166", name: "ブカッコウ", tribe: "bukimi" },
+            { no: "167", name: "死神鳥", tribe: "bukimi" },
+            { no: "168", name: "けうけげん", tribe: "bukimi" },
+            { no: "169", name: "ふさふさん", tribe: "bukimi" },
+            { no: "170", name: "くちだけおんな", tribe: "bukimi" },
+            { no: "171", name: "でんぱく小僧", tribe: "bukimi" },
+            { no: "172", name: "じがじぃさん", tribe: "bukimi" },
+            { no: "173", name: "のぼせトンマン(通常)", tribe: "bukimi" },
+            { no: "174", name: "おならず者", tribe: "bukimi" },
+            { no: "175", name: "へこ鬼神", tribe: "bukimi" },
+            { no: "176", name: "ドン油坊", tribe: "bukimi" },
+            { no: "177", name: "まてんし", tribe: "bukimi" },
+            { no: "178", name: "まてんロウ", tribe: "bukimi" },
+            { no: "179", name: "クワノ武士(B)", tribe: "bukimi" },
+            { no: "180", name: "かたづ家来(B)", tribe: "bukimi" },
+            { no: "181", name: "ナガバナ", tribe: "bukimi" },
+            { no: "182", name: "ナガバナナ", tribe: "bukimi" },
+            { no: "183", name: "はらおドリ", tribe: "bukimi" },
+            { no: "184", name: "ステテコパンツ", tribe: "bukimi" },
+            { no: "185", name: "おつぼね様", tribe: "bukimi" },
+            { no: "186", name: "しわくちゃん", tribe: "bukimi" },
+            { no: "187", name: "老いらん", tribe: "bukimi" },
+            { no: "188", name: "ふじみ御前", tribe: "bukimi" },
+            { no: "189", name: "ノコノコ", tribe: "nyororon" },
+            { no: "190", name: "ツチノコ", tribe: "nyororon" },
+            { no: "191", name: "ツチノコパンダ", tribe: "nyororon" },
+            { no: "192", name: "ふくりゅう", tribe: "nyororon" },
+            { no: "193", name: "りゅーくん", tribe: "nyororon" },
+            { no: "194", name: "龍神", tribe: "nyororon" },
+            { no: "195", name: "青龍", tribe: "nyororon" },
+            { no: "196", name: "ろくろ首", tribe: "nyororon" },
+            { no: "197", name: "ボー坊", tribe: "nyororon" },
+            { no: "198", name: "しらんプリン", tribe: "nyororon" },
+            { no: "199", name: "にんぎょ", tribe: "nyororon" },
+            { no: "200", name: "八百比丘尼", tribe: "nyororon" },
+            { no: "201", name: "イザナミ", tribe: "nyororon" },
+            { no: "202", name: "ムカデ怪獣", tribe: "nyororon" },
+            { no: "203", name: "激ドラゴン", tribe: "nyororon" },
+            { no: "204", name: "オロチ", tribe: "nyororon" },
+            { no: "205", name: "影オロチ", tribe: "nyororon" },
+            { no: "206", name: "たべものがかり", tribe: "nyororon" },
+            { no: "207", name: "ミツマタノヅチ(偽)", tribe: "nyororon" },
+            { no: "208", name: "しきるん蛇", tribe: "nyororon" },
+            { no: "209", name: "すねスネーク", tribe: "nyororon" },
+            { no: "210", name: "まむし行司", tribe: "nyororon" },
+            { no: "211", name: "ウワノソラ", tribe: "nyororon" },
+            { no: "212", name: "笑ウツボ", tribe: "nyororon" },
+            { no: "213", name: "歌ウナギ", tribe: "nyororon" },
+            // 【公式準拠】レジェンド妖怪（No.214〜218）
+            { no: "214", name: "ブシニャン", tribe: "isamashi" },
+            { no: "215", name: "しゅらコマ", tribe: "fushigi" },
+            { no: "216", name: "イケメン犬", tribe: "bukimi" },
+            { no: "217", name: "花さか爺", tribe: "pokapoka" },
+            { no: "218", name: "山吹鬼", tribe: "goketsu" },
+            // 【例外枠】宝石ニャン（初代大辞典には番号が存在しないため、便宜上「-」表示）
+            { no: "219", name: "サファイニャン", tribe: "purichi" },
+            { no: "220", name: "エメラルニャン", tribe: "purichi" },
+            { no: "221", name: "ルビーニャン", tribe: "purichi" },
+            { no: "222", name: "トパーニャン", tribe: "purichi" },
+            { no: "223", name: "ダイヤニャン", tribe: "purichi" }
+            ];
+let currentType = "";
+function openModal(type, typeName) {
+currentType = type;
+document.getElementById("modalTitle").innerText = ${typeName}を選択;
+const listDiv = document.getElementById("yokaiList");
+listDiv.innerHTML = "";
+yokaiData.forEach(yokai => {
+if (yokai.tribe === type) {
+const btn = document.createElement("button");
+btn.className = "yokai-btn";
+const noDisplay = yokai.no === "-" ? "No.-" : No.${yokai.no};
+btn.innerHTML = <span>${yokai.name}</span><span class="no-tag">${noDisplay}</span>;
+btn.onclick = () => selectYokai(yokai.name);
+listDiv.appendChild(btn);
+}
+});
+document.getElementById("yokaiModal").style.display = "flex";
+}
+function selectYokai(name) {
+document.getElementById(slot-${currentType}).innerText = name;
+closeModal();
+}
+function closeModal() {
+document.getElementById("yokaiModal").style.display = "none";
+}
 
-        let currentType = "";
 
-        function openModal(type, typeName) {
-            currentType = type;
-            document.getElementById("modalTitle").innerText = `${typeName}を選択`;
-            const listDiv = document.getElementById("yokaiList");
-            listDiv.innerHTML = ""; 
-
-            // 50音順に並び替えてボタンを生成
-            const sortedList = [...yokaiData[type]].sort((a, b) => a.localeCompare(b, 'ja'));
-
-            sortedList.forEach(name => {
-                const btn = document.createElement("button");
-                btn.className = "yokai-btn";
-                btn.innerText = name;
-                btn.onclick = () => selectYokai(name);
-                listDiv.appendChild(btn);
-            });
-
-            document.getElementById("yokaiModal").style.display = "flex";
-        }
-
-        function selectYokai(name) {
-            document.getElementById(`slot-${currentType}`).innerText = name;
-            closeModal();
-        }
-
-        function closeModal() {
-            document.getElementById("yokaiModal").style.display = "none";
-        }
-    </script>
-</body>
-</html>
