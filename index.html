@@ -3,63 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>好きな妖怪種族メーカー（試作版）</title>
+    <title>好きな妖怪種族メーカー（初代版）</title>
     <style>
-        body { font-family: sans-serif; text-align: center; background: #f0f0f0; margin: 0; padding: 20px; }
-        h1 { font-size: 1.5rem; color: #333; }
-        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; max-width: 400px; margin: 20px auto; }
-        .slot { background: white; border: 3px solid #ccc; border-radius: 10px; padding: 20px; min-height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
-        .slot-title { font-weight: bold; font-size: 0.9rem; color: #666; margin-bottom: 5px; }
-        .selected-name { font-size: 1.2rem; color: #ff5722; font-weight: bold; }
-        /* ポップアップのスタイル */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
-        .modal-content { background: white; padding: 20px; border-radius: 15px; width: 80%; max-width: 300px; }
-        .modal-content button { display: block; width: 100%; padding: 10px; margin: 10px 0; font-size: 1rem; border: 1px solid #ddd; border-radius: 5px; background: #f9f9f9; }
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; text-align: center; background: #f4f6f9; margin: 0; padding: 20px; color: #333; }
+        h1 { font-size: 1.4rem; color: #2c3e50; margin-bottom: 5px; }
+        .subtitle { font-size: 0.85rem; color: #7f8c8d; margin-top: 0; margin-bottom: 20px; }
+        
+        /* 8種族のグリッド（2列） */
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; max-width: 450px; margin: 0 auto 30px; }
+        
+        /* 各マスの基本スタイル */
+        .slot { background: white; border-radius: 12px; padding: 15px 10px; min-height: 75px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.1s; }
+        .slot:active { transform: scale(0.95); }
+        .slot-title { font-weight: bold; font-size: 0.85rem; margin-bottom: 6px; }
+        .selected-name { font-size: 1.1rem; font-weight: bold; color: #333; }
+        
+        /* 種族ごとのイメージカラー */
+        .isamashi { border: 3px solid #e74c3c; } .isamashi .slot-title { color: #e74c3c; }
+        .fushigi { border: 3px solid #f1c40f; } .fushigi .slot-title { color: #f39c12; }
+        .goketsu { border: 3px solid #e67e22; } .goketsu .slot-title { color: #d35400; }
+        .purichi { border: 3px solid #e84393; } .purichi .slot-title { color: #e84393; }
+        .pokapoka { border: 3px solid #2ecc71; } .pokapoka .slot-title { color: #27ae60; }
+        .usurakage { border: 3px solid #9b59b6; } .usurakage .slot-title { color: #8e44ad; }
+        .bukimi { border: 3px solid #1abc9c; } .bukimi .slot-title { color: #16a085; }
+        .nyororon { border: 3px solid #3498db; } .nyororon .slot-title { color: #2980b9; }
+
+        /* スクロール可能なポップアップ */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { background: white; padding: 20px; border-radius: 20px; width: 85%; max-width: 340px; max-height: 70%; display: flex; flex-direction: column; }
+        .modal-header { font-size: 1.1rem; font-weight: bold; margin-bottom: 15px; text-align: center; }
+        .yokai-list-wrapper { overflow-y: auto; flex-grow: 1; padding-right: 5px; }
+        
+        /* リスト内のボタン */
+        .yokai-btn { display: block; width: 100%; padding: 12px; margin: 8px 0; font-size: 1rem; font-weight: 500; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; color: #333; text-align: center; -webkit-tap-highlight-color: transparent; }
+        .yokai-btn:active { background: #f5f5f5; }
+        .close-btn { width: 100%; padding: 12px; margin-top: 15px; font-size: 1rem; border: none; border-radius: 8px; background: #bdc3c7; color: white; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <h1>👻 好きな妖怪種族メーカー (試作版)</h1>
-    <p>枠をタップして妖怪を選んでね！完成したらスクショしよう</p>
+    <h1>👻 好きな妖怪種族メーカー</h1>
+    <p class="subtitle">枠をタップして初代(無印)の推し妖怪を選ぼう！</p>
 
     <div class="grid">
-        <div class="slot" onclick="openModal('isamashi')">
+        <div class="slot isamashi" onclick="openModal('isamashi', 'イサマシ族')">
             <div class="slot-title">イサマシ族</div>
             <div class="selected-name" id="slot-isamashi">？？？</div>
         </div>
-        <div class="slot" onclick="openModal('purichi')">
+        <div class="slot fushigi" onclick="openModal('fushigi', 'フシギ族')">
+            <div class="slot-title">フシギ族</div>
+            <div class="selected-name" id="slot-fushigi">？？？</div>
+        </div>
+        <div class="slot goketsu" onclick="openModal('goketsu', 'ゴーケツ族')">
+            <div class="slot-title">ゴーケツ族</div>
+            <div class="selected-name" id="slot-goketsu">？？？</div>
+        </div>
+        <div class="slot purichi" onclick="openModal('purichi', 'プリチー族')">
             <div class="slot-title">プリチー族</div>
             <div class="selected-name" id="slot-purichi">？？？</div>
+        </div>
+        <div class="slot pokapoka" onclick="openModal('pokapoka', 'ポカポカ族')">
+            <div class="slot-title">ポカポカ族</div>
+            <div class="selected-name" id="slot-pokapoka">？？？</div>
+        </div>
+        <div class="slot usurakage" onclick="openModal('usurakage', 'ウスラカゲ族')">
+            <div class="slot-title">ウスラカゲ族</div>
+            <div class="selected-name" id="slot-usurakage">？？？</div>
+        </div>
+        <div class="slot bukimi" onclick="openModal('bukimi', 'ブキミー族')">
+            <div class="slot-title">ブキミー族</div>
+            <div class="selected-name" id="slot-bukimi">？？？</div>
+        </div>
+        <div class="slot nyororon" onclick="openModal('nyororon', 'ニョロロン族')">
+            <div class="slot-title">ニョロロン族</div>
+            <div class="selected-name" id="slot-nyororon">？？？</div>
         </div>
     </div>
 
     <!-- 妖怪選択ポップアップ -->
     <div class="modal" id="yokaiModal" onclick="closeModal()">
         <div class="modal-content" onclick="event.stopPropagation()">
-            <h3 id="modalTitle">妖怪を選ぶ</h3>
-            <div id="yokaiList"></div>
-            <button onclick="closeModal()" style="background: #ccc;">閉じる</button>
+            <div class="modal-header" id="modalTitle">妖怪を選択</div>
+            <div class="yokai-list-wrapper" id="yokaiList"></div>
+            <button class="close-btn" onclick="closeModal()">閉じる</button>
         </div>
     </div>
 
     <script>
-        // 妖怪のリストデータ
+        // 妖怪ウォッチ1の全8種族データ
         const yokaiData = {
-            isamashi: ["ジバニャン(シャドウ)", "ブシニャン", "メラメライオン", "くさなぎ"],
-            purichi: ["ジバニャン", "コマさん", "コマじろう", "ふぶき姫"]
+            isamashi: ["ダルマッカ", "だるまっちょ", "グラグライオン", "メラメライオン", "轟獅子", "しょうブシ", "まぼ老師", "かげ老師", "ほう老師", "ベンケイ", "からくりベンケイ", "ちからモチ", "やきモチ", "クワノ武士", "クワガ大将", "武者かぶと", "かぶと無双", "なまはげ", "ちすじのナマハゲ", "クワガタ大将", "オオクワノ神", "ブシニャン"],
+            fushigi: ["バクロ婆", "動くバクロ婆", "どハツラツ", "わすれん帽", "メゾン・ドワスレ", "ばか頭巾", "のっぺら坊", "まぼ老師", "かげ老師", "ほう老師", "うんがい鏡", "さとりちゃん", "よつめ", "天狗", "ほむら天狗", "きゅうび", "犬神", "モテモ天", "モテマクール", "モテヌス", "かたのり小僧", "かたのり親方", "ぎしんあん鬼"],
+            goketsu: ["グレるりん", "ゴリだるま", "アニ鬼", "ヨロイさん", "ゲンカノコウジ", "モレゾウ", "プルファント", "ガマンモス", "迷い車", "だっせんしゃ", "くろがねセンシャ", "ムリカベ", "むりだ城", "シロカベ", "うみぼうず", "大ガマ", "土蜘蛛", "ロボニャン", "金太郎ニャン", "ゴルニャン"],
+            purichi: ["ジバニャン", "トゲニャン", "ワルニャン", "ブチニャン", "コマさん", "ししコマ", "コマじろう", "とらじろう", "コマみ", "セミまる", "カゲまる", "ヒグラシまる", "さとりちゃん", "エミちゃん", "ゆきおんな", "ふぶき姫", "百鬼姫", "バク", "おツマミちゃん", "マスターニャーダ"],
+            pokapoka: ["サンタク労", "ふくろじじい", "ぜっこう蝶", "ゼッコウ蝶", "サイコウ蝶", "アゲアゲハ", "キズナメコ", "キズナース", "びきゃく", "しゃれこ婦人", "カラカラさん", "ほね美人", "ひも爺", "くう腹爺", "こめ爺", "ワカメくん", "コンブくん", "メカブちゃん", "ワカメ☆スター"],
+            usurakage: ["みちび鬼", "えこひいき", "ちくり魔", "ひきコウモリ", "トジコウモリ", "ヤミコウモリ", "ネガティブーン", "ジャガバタ坊", "かぜかも", "ガブニャン", "魔ガサス", "メデューサ", "三途の犬", "かたづ家来", "アライ魔将", "リー夫人", "ミツマタノヅチ"],
+            bukimi: ["トホホギス", "ブカッコウ", "死神鳥", "じんめん犬", "かおベロス", "三途の犬", "けうけげん", "ふさふさん", "くちだけおんな", "おとらおんな", "じがじぃさん", "のぼせトンマン", "おならず者", "へこ鬼神", "ドンヨリーヌ", "まてんし", "かたづ家来"],
+            nyororon: ["ノコノコ", "ツチノコ", "ツチノコパンダ", "ふくりゅう", "りゅーくん", "龍神", "青龍", "ろくろ首", "ボー坊", "しらんプリン", "にんぎょ", "八百比丘尼", "イザナミ", "ムカムカデ", "激ドラゴン", "オロチ", "影オロチ", "ミツマタノヅチ"]
         };
 
         let currentType = "";
 
-        function openModal(type) {
+        function openModal(type, typeName) {
             currentType = type;
-            document.getElementById("modalTitle").innerText = type === 'isamashi' ? "イサマシ族を選択" : "プリチー族を選択";
+            document.getElementById("modalTitle").innerText = `${typeName}を選択`;
             const listDiv = document.getElementById("yokaiList");
-            listDiv.innerHTML = ""; // 一旦クリア
+            listDiv.innerHTML = ""; 
 
-            // リストからボタンを生成
-            yokaiData[type].forEach(name => {
+            // 50音順に並び替えてボタンを生成
+            const sortedList = [...yokaiData[type]].sort((a, b) => a.localeCompare(b, 'ja'));
+
+            sortedList.forEach(name => {
                 const btn = document.createElement("button");
+                btn.className = "yokai-btn";
                 btn.innerText = name;
                 btn.onclick = () => selectYokai(name);
                 listDiv.appendChild(btn);
