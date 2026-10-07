@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>好きな妖怪種族メーカー（試作版）</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; background: #f0f0f0; margin: 0; padding: 20px; }
+        h1 { font-size: 1.5rem; color: #333; }
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; max-width: 400px; margin: 20px auto; }
+        .slot { background: white; border: 3px solid #ccc; border-radius: 10px; padding: 20px; min-height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
+        .slot-title { font-weight: bold; font-size: 0.9rem; color: #666; margin-bottom: 5px; }
+        .selected-name { font-size: 1.2rem; color: #ff5722; font-weight: bold; }
+        /* ポップアップのスタイル */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
+        .modal-content { background: white; padding: 20px; border-radius: 15px; width: 80%; max-width: 300px; }
+        .modal-content button { display: block; width: 100%; padding: 10px; margin: 10px 0; font-size: 1rem; border: 1px solid #ddd; border-radius: 5px; background: #f9f9f9; }
+    </style>
+</head>
+<body>
+
+    <h1>👻 好きな妖怪種族メーカー (試作版)</h1>
+    <p>枠をタップして妖怪を選んでね！完成したらスクショしよう</p>
+
+    <div class="grid">
+        <div class="slot" onclick="openModal('isamashi')">
+            <div class="slot-title">イサマシ族</div>
+            <div class="selected-name" id="slot-isamashi">？？？</div>
+        </div>
+        <div class="slot" onclick="openModal('purichi')">
+            <div class="slot-title">プリチー族</div>
+            <div class="selected-name" id="slot-purichi">？？？</div>
+        </div>
+    </div>
+
+    <!-- 妖怪選択ポップアップ -->
+    <div class="modal" id="yokaiModal" onclick="closeModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h3 id="modalTitle">妖怪を選ぶ</h3>
+            <div id="yokaiList"></div>
+            <button onclick="closeModal()" style="background: #ccc;">閉じる</button>
+        </div>
+    </div>
+
+    <script>
+        // 妖怪のリストデータ
+        const yokaiData = {
+            isamashi: ["ジバニャン(シャドウ)", "ブシニャン", "メラメライオン", "くさなぎ"],
+            purichi: ["ジバニャン", "コマさん", "コマじろう", "ふぶき姫"]
+        };
+
+        let currentType = "";
+
+        function openModal(type) {
+            currentType = type;
+            document.getElementById("modalTitle").innerText = type === 'isamashi' ? "イサマシ族を選択" : "プリチー族を選択";
+            const listDiv = document.getElementById("yokaiList");
+            listDiv.innerHTML = ""; // 一旦クリア
+
+            // リストからボタンを生成
+            yokaiData[type].forEach(name => {
+                const btn = document.createElement("button");
+                btn.innerText = name;
+                btn.onclick = () => selectYokai(name);
+                listDiv.appendChild(btn);
+            });
+
+            document.getElementById("yokaiModal").style.display = "flex";
+        }
+
+        function selectYokai(name) {
+            document.getElementById(`slot-${currentType}`).innerText = name;
+            closeModal();
+        }
+
+        function closeModal() {
+            document.getElementById("yokaiModal").style.display = "none";
+        }
+    </script>
+</body>
+</html>
